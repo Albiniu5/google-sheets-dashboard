@@ -15,6 +15,106 @@ body {
     padding: 20px;
 }
 
+/* Login Screen Styles */
+.login-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #1a1a1a;
+    z-index: 2000;
+}
+
+.login-container {
+    background-color: #2a2a2a;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-container h2 {
+    color: #ff6200;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    text-shadow: 0 0 10px rgba(255, 98, 0, 0.5);
+}
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-size: 1rem;
+    color: #e0e0e0;
+    margin-bottom: 5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #3a3a3a;
+    color: #e0e0e0;
+    font-size: 1rem;
+    outline: none;
+}
+
+.form-group input:focus {
+    box-shadow: 0 0 10px rgba(255, 98, 0, 0.7);
+}
+
+.login-container button {
+    width: 100%;
+    padding: 10px;
+    background-color: #ff6200;
+    border: none;
+    border-radius: 5px;
+    color: #e0e0e0;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login-container button:hover {
+    background-color: #e05500;
+}
+
+.error-message {
+    color: #ff4444;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    display: none;
+}
+
+/* Logout Button Styles */
+.logout-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 8px 16px;
+    background-color: #ff4444;
+    border: none;
+    border-radius: 5px;
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: #e03333;
+}
+
 .container {
     max-width: 800px;
     width: 100%;
@@ -502,6 +602,13 @@ h1 {
         justify-content: center;
     }
 
+    /* Adjust logout button on mobile */
+    .logout-btn {
+        position: static;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
     h1 {
         font-size: 1.8rem;
         margin-bottom: 15px;
@@ -637,5 +744,25 @@ h1 {
 
     .sheet-link {
         font-size: 0.9em;
+    }
+
+    /* Login screen adjustments */
+    .login-container {
+        padding: 20px;
+        max-width: 90%;
+    }
+
+    .login-container h2 {
+        font-size: 1.5rem;
+    }
+
+    .form-group input {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+
+    .login-container button {
+        font-size: 0.9rem;
+        padding: 8px;
     }
 }

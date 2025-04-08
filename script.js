@@ -39,7 +39,7 @@ const collections = [
             "XBOX!A:Z",
             "XBOX360!A:Z"
         ],
-        icon: "console-controller.png"
+        icon: "console.png"
     }
 ];
 
@@ -140,6 +140,39 @@ let activeCollection = null; // Track the currently active collection (e.g., "Co
 // Google Sheets API configuration
 const API_KEY = 'AIzaSyAQKibD5tUuhpSDTjL67a4Z_pWgj0EcSTg';
 const DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
+
+// Hardcoded credentials (for client-side demo purposes only)
+const VALID_USERNAME = "albinius";
+const VALID_PASSWORD = "latenweminen12Aa";
+
+// Function to check if the user is logged in
+function isLoggedIn() {
+    return localStorage.getItem("isLoggedIn") === "true";
+}
+
+// Function to log in the user
+function login(username, password) {
+    if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+        localStorage.setItem("isLoggedIn", "true");
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+        document.getElementById("loginError").style.display = "none";
+        // Initialize the Google API client only after login
+        initClient();
+    } else {
+        document.getElementById("loginError").textContent = "Invalid username or password.";
+        document.getElementById("loginError").style.display = "block";
+    }
+}
+
+// Function to log out the user
+function logout() {
+    localStorage.removeItem("isLoggedIn");
+    document.getElementById("mainContent").style.display = "none";
+    document.getElementById("loginScreen").style.display = "flex";
+    document.getElementById("loginForm").reset();
+    document.getElementById("loginError").style.display = "none";
+}
 
 // Initialize the Google API Client (without OAuth)
 function initClient() {
@@ -1087,9 +1120,40 @@ function searchCollections() {
     displayCollections(searchResults);
 }
 
-// Add event listener for the search bar
+// Add event listeners on DOM load
 document.addEventListener("DOMContentLoaded", () => {
+    const loginScreen = document.getElementById("loginScreen");
+    const mainContent = document.getElementById("mainContent");
+    const loginForm = document.getElementById("loginForm");
+    const logoutButton = document.getElementById("logoutButton");
     const searchBar = document.getElementById("searchBar");
+
+    // Check if the user is already logged in
+    if (isLoggedIn()) {
+        loginScreen.style.display = "none";
+        mainContent.style.display = "block";
+        initClient(); // Initialize the Google API client if already logged in
+    } else {
+        loginScreen.style.display = "flex";
+        mainContent.style.display = "none";
+    }
+
+    // Handle login form submission
+    if (loginForm) {
+        loginForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            login(username, password);
+        });
+    }
+
+    // Handle logout
+    if (logoutButton) {
+        logoutButton.addEventListener("click", logout);
+    }
+
+    // Add search bar event listener
     if (searchBar) {
         searchBar.addEventListener("input", searchCollections);
     } else {
@@ -1098,8 +1162,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Set the initial view class
     const collectionGrid = document.getElementById("collectionGrid");
-    collectionGrid.classList.add(currentView + '-view');
+    if (collectionGrid) {
+        collectionGrid.classList.add(currentView + '-view');
+    }
 });
-
-// Start the process
-initClient();
