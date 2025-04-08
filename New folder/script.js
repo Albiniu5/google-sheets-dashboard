@@ -39,7 +39,7 @@ const collections = [
             "XBOX!A:Z",
             "XBOX360!A:Z"
         ],
-        icon: "console-controller.png"
+        icon: "console.png"
     }
 ];
 
@@ -133,13 +133,59 @@ const displayFields = {
 let sheetData = {};
 
 // Keep track of the current view and displayed items
-let currentView = 'grid'; // Default to grid view
+let currentView = 'list'; // Default to list view
 let currentItems = collections; // Default to collections list
 let activeCollection = null; // Track the currently active collection (e.g., "Coins")
 
 // Google Sheets API configuration
 const API_KEY = 'AIzaSyAQKibD5tUuhpSDTjL67a4Z_pWgj0EcSTg';
 const DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
+
+// Hardcoded credentials (for client-side demo purposes only)
+const VALID_USERNAME = "albinius";
+const VALID_PASSWORD = "latenweminen12Aa";
+
+// Function to check if the user is logged in
+function isLoggedIn() {
+    return localStorage.getItem("isLoggedIn") === "true";
+}
+
+// Function to log in the user
+function login(username, password) {
+    if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+        localStorage.setItem("isLoggedIn", "true");
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("mainContent").style.display = "flex";
+        document.getElementById("loginError").style.display = "none";
+        // Initialize the Google API client only after login
+        initClient();
+    } else {
+        document.getElementById("loginError").textContent = "Invalid username or password.";
+        document.getElementById("loginError").style.display = "block";
+    }
+}
+
+// Function to log out the user
+function logout() {
+    localStorage.removeItem("isLoggedIn");
+    document.getElementById("mainContent").style.display = "none";
+    document.getElementById("loginScreen").style.display = "flex";
+    document.getElementById("loginForm").reset();
+    document.getElementById("loginError").style.display = "none";
+    // Close the menu if open
+    const sideMenu = document.getElementById("sideMenu");
+    const container = document.querySelector(".container");
+    sideMenu.classList.remove("open");
+    container.classList.remove("menu-open");
+}
+
+// Function to toggle the side menu
+function toggleMenu() {
+    const sideMenu = document.getElementById("sideMenu");
+    const container = document.querySelector(".container");
+    sideMenu.classList.toggle("open");
+    container.classList.toggle("menu-open");
+}
 
 // Initialize the Google API Client (without OAuth)
 function initClient() {
@@ -996,6 +1042,12 @@ function searchCollections() {
     const searchBar = document.getElementById("searchBar");
     const searchText = searchBar.value.toLowerCase();
 
+    // If the search bar is empty, return to the main page (collections list)
+    if (!searchText.trim()) {
+        displayCollections(collections);
+        return;
+    }
+
     // Get filter values for Coins
     const tabFilter = document.getElementById("tabFilter")?.value || "all";
     const countryFilter = document.getElementById("countryFilter")?.value || "all";
@@ -1087,19 +1139,101 @@ function searchCollections() {
     displayCollections(searchResults);
 }
 
-// Add event listener for the search bar
+// Add event listeners on DOM load
 document.addEventListener("DOMContentLoaded", () => {
+    const loginScreen = document.getElementById("loginScreen");
+    const mainContent = document.getElementById("mainContent");
+    const loginForm = document.getElementById("loginForm");
+    const logoutButton = document.getElementById("logoutButton");
     const searchBar = document.getElementById("searchBar");
-    if (searchBar) {
-        searchBar.addEventListener("input", searchCollections);
-    } else {
-        console.error("Search bar element not found!");
+    const menuToggle = document.getElementById("menuToggle");
+    const viewToggle = document.getElementById("viewToggle");
+
+    // Ensure the view starts in list mode
+    currentView = 'list';
+    const collectionGrid = document.getElementById("collectionGrid");
+    if (collectionGrid) {
+        collectionGrid.classList.add('list-view');
+    }
+    if (viewToggle) {
+        viewToggle.checked = true; // Ensure the toggle reflects list mode (checked = list)
     }
 
-    // Set the initial view class
-    const collectionGrid = document.getElementById("collectionGrid");
-    collectionGrid.classList.add(currentView + '-view');
-});
+    // Check if the user is already logged in
+    if (isLoggedIn()) {
+        loginScreen.style.display = "none";
+        mainContent.style.display = "flex";
+        initClient(); // Initialize the Google API client if already logged in
+    } else {
+        loginScreen.style.display = "flex";
+        mainContent.style.display = "none";
+    }
 
-// Start the process
-initClient();
+    // Handle login form submission
+    if (loginForm) {
+        loginForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            login(username, password);
+        });
+    }
+
+    // Handle logout
+    if (logoutButton) {
+        logoutButton.addEventListener("click", () => {
+            logout();
+        });
+    }
+
+    // Handle search input
+    if (searchBar) {
+        searchBar.addEventListener("input", () => {
+            searchCollections();
+        });
+    }
+
+    // Handle menu toggle
+    if (menuToggle) {
+        menuToggle.addEventListener("click", () => {
+            toggleMenu();
+        });
+    }
+
+    // Handle view toggle (already handled by onchange in HTML, but ensure consistency)
+    if (viewToggle) {
+        viewToggle.addEventListener("change", () => {
+            toggleView(viewToggle.checked ? 'list' : 'grid');
+        });
+    }
+
+    // Handle filter changes for Coins
+    const tabFilter = document.getElementById("tabFilter");
+    const countryFilter = document.getElementById("countryFilter");
+    const yearFrom = document.getElementById("yearFrom");
+    const yearTo = document.getElementById("yearTo");
+
+    if (tabFilter) {
+        tabFilter.addEventListener("change", () => {
+            searchCollections();
+        });
+    }
+
+    if (countryFilter) {
+        countryFilter.addEventListener("change", () => {
+            searchCollections();
+        });
+    }
+
+    if (yearFrom) {
+        yearFrom.addEventListener("input", () => {
+            searchCollections();
+        });
+    }
+
+    if (yearTo) {
+        yearTo.addEventListener("input", () => {
+            searchCollections();
+        });
+    }
+});

@@ -133,9 +133,10 @@ const displayFields = {
 let sheetData = {};
 
 // Keep track of the current view and displayed items
-let currentView = 'grid'; // Default to grid view
+let currentView = 'list'; // Default to list view
 let currentItems = collections; // Default to collections list
 let activeCollection = null; // Track the currently active collection (e.g., "Coins")
+let currentState = 'main'; // Track the current state: 'main', 'submenu', or 'tab'
 
 // Google Sheets API configuration
 const API_KEY = 'AIzaSyAQKibD5tUuhpSDTjL67a4Z_pWgj0EcSTg';
@@ -155,7 +156,7 @@ function login(username, password) {
     if (username === VALID_USERNAME && password === VALID_PASSWORD) {
         localStorage.setItem("isLoggedIn", "true");
         document.getElementById("loginScreen").style.display = "none";
-        document.getElementById("mainContent").style.display = "block";
+        document.getElementById("mainContent").style.display = "flex";
         document.getElementById("loginError").style.display = "none";
         // Initialize the Google API client only after login
         initClient();
@@ -172,6 +173,22 @@ function logout() {
     document.getElementById("loginScreen").style.display = "flex";
     document.getElementById("loginForm").reset();
     document.getElementById("loginError").style.display = "none";
+    // Close the menu if open
+    const sideMenu = document.getElementById("sideMenu");
+    const container = document.querySelector(".container");
+    sideMenu.classList.remove("open");
+    container.classList.remove("menu-open");
+    // Reset to main page
+    currentState = 'main';
+    displayCollections(collections);
+}
+
+// Function to toggle the side menu
+function toggleMenu() {
+    const sideMenu = document.getElementById("sideMenu");
+    const container = document.querySelector(".container");
+    sideMenu.classList.toggle("open");
+    container.classList.toggle("menu-open");
 }
 
 // Initialize the Google API Client (without OAuth)
@@ -362,7 +379,7 @@ function populateCountryFilter(coinsData) {
     console.log("Populated country filter with:", sortedCountries);
 }
 
-// Function to show/hide the Coins filter based on the active collection or search results
+// Function to show/hide the Coins filter based on the active collection, search results, or current state
 function updateFilterVisibility(items) {
     const coinsFilter = document.getElementById("coinsFilter");
     if (!coinsFilter) {
@@ -370,15 +387,23 @@ function updateFilterVisibility(items) {
         return;
     }
 
-    // Show the filter if the active collection is "Coins" or if search results include Coins items
-    if (activeCollection === "Coins" || (items.length > 0 && items.some(item => item.collectionName === "Coins"))) {
+    // Show the filter if:
+    // 1. The active collection is "Coins" (when viewing a modal)
+    // 2. Search results include Coins items
+    // 3. The current state is 'submenu' or 'tab' (when viewing the Coins submenu or a Coins tab)
+    if (
+        activeCollection === "Coins" ||
+        (items.length > 0 && items.some(item => item.collectionName === "Coins")) ||
+        currentState === 'submenu' ||
+        currentState === 'tab'
+    ) {
         coinsFilter.style.display = "block";
     } else {
         coinsFilter.style.display = "none";
     }
 }
 
-// Function to open the modal and display data
+// Function to open the modal and display data (for non-Coins collections)
 function openModal(data, type) {
     const modal = document.getElementById("sheetModal");
     const modalTitle = document.getElementById("modalTitle");
@@ -656,12 +681,145 @@ function toggleView(view) {
     }
 
     // Re-render the current items in the new view
-    displayCollections(currentItems);
+    if (currentState === 'main' || currentState === 'search') {
+        displayCollections(currentItems);
+    } else if (currentState === 'tab') {
+        // Re-display the current tab data in the new view
+        const currentTab = collectionGrid.dataset.currentTab;
+        displayTabData("Coins", currentTab);
+    }
+}
+
+// Function to show the Coins submenu
+function showCoinsSubmenu() {
+    const coinsSubmenu = document.getElementById("coinsSubmenu");
+    const collectionGrid = document.getElementById("collectionGrid");
+    const backButton = document.getElementById("backButton");
+    const searchBar = document.getElementById("searchBar");
+
+    // Update the current state
+    currentState = 'submenu';
+    currentItems = []; // Clear current items since we're not displaying search results
+
+    // Hide the collection grid and search bar, show the submenu and back button
+    collectionGrid.style.display = "none";
+    searchBar.style.display = "none";
+    coinsSubmenu.style.display = "block";
+    backButton.style.display = "inline-block";
+
+    // Update filter visibility
+    updateFilterVisibility(currentItems);
+}
+
+// Function to display tab data directly on the page
+function displayTabData(collectionName, tabName) {
+    const collectionGrid = document.getElementById("collectionGrid");
+    const coinsSubmenu = document.getElementById("coinsSubmenu");
+    const backButton = document.getElementById("backButton");
+    const searchBar = document.getElementById("searchBar");
+
+    // Update the current state
+    currentState = 'tab';
+    currentItems = []; // Clear current items since we're not displaying search results
+    collectionGrid.dataset.currentTab = tabName; // Store the current tab for view toggling
+
+    // Hide the submenu and search bar, show the collection grid and back button
+    coinsSubmenu.style.display = "none";
+    searchBar.style.display = "none";
+    collectionGrid.style.display = "block";
+    backButton.style.display = "inline-block";
+
+    // Clear the collection grid
+    collectionGrid.innerHTML = "";
+
+    // Update filter visibility
+    updateFilterVisibility(currentItems);
+
+    // Get the data for this collection and tab
+    const collectionData = sheetData[collectionName] || [];
+    const tabData = collectionData.filter(rowEntry => rowEntry.sheetName === tabName);
+
+    if (tabData.length === 0) {
+        collectionGrid.innerHTML = "<div class='no-results'>No data available for this tab.</div>";
+        return;
+    }
+
+    // Create a container for the tab content
+    const tabContent = document.createElement("div");
+    tabContent.classList.add("tab-content");
+
+    // Create a table to display the tab data
+    const table = document.createElement("table");
+
+    // Add the headers
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    const headers = tabData[0].headers;
+    headers.forEach(header => {
+        const th = document.createElement("th");
+        th.textContent = header || "N/A";
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Add the rows
+    const tbody = document.createElement("tbody");
+    tabData.forEach(rowEntry => {
+        const row = rowEntry.rowData;
+        const tr = document.createElement("tr");
+        row.forEach(cell => {
+            const td = document.createElement("td");
+            td.textContent = cell || "";
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    tabContent.appendChild(table);
+    collectionGrid.appendChild(tabContent);
+}
+
+// Function to return to the main page
+function returnToMainPage() {
+    const coinsSubmenu = document.getElementById("coinsSubmenu");
+    const collectionGrid = document.getElementById("collectionGrid");
+    const backButton = document.getElementById("backButton");
+    const searchBar = document.getElementById("searchBar");
+
+    // Update the current state
+    currentState = 'main';
+    currentItems = collections;
+
+    // Hide the submenu and back button, show the collection grid and search bar
+    coinsSubmenu.style.display = "none";
+    backButton.style.display = "none";
+    collectionGrid.style.display = "block";
+    searchBar.style.display = "block";
+
+    // Reset the search bar
+    searchBar.value = "";
+
+    // Display the main page
+    displayCollections(collections);
 }
 
 // Function to display collections or search results
 function displayCollections(items) {
     const collectionGrid = document.getElementById("collectionGrid");
+    const coinsSubmenu = document.getElementById("coinsSubmenu");
+    const backButton = document.getElementById("backButton");
+    const searchBar = document.getElementById("searchBar");
+
+    // If we're in the 'main' state, ensure the correct elements are visible
+    if (currentState === 'main') {
+        coinsSubmenu.style.display = "none";
+        backButton.style.display = "none";
+        collectionGrid.style.display = "block";
+        searchBar.style.display = "block";
+    }
+
     collectionGrid.innerHTML = ""; // Clear the grid
 
     // Store the current items being displayed
@@ -700,9 +858,13 @@ function displayCollections(items) {
 
             collectionItem.appendChild(contentWrapper);
 
-            // Add click event to open the modal with sheet data
+            // Add click event: show submenu for Coins, modal for others
             collectionItem.addEventListener("click", () => {
-                openModal(collection.name, "collection");
+                if (collection.name === "Coins") {
+                    showCoinsSubmenu();
+                } else {
+                    openModal(collection.name, "collection");
+                }
             });
 
             collectionGrid.appendChild(collectionItem);
@@ -1029,6 +1191,16 @@ function searchCollections() {
     const searchBar = document.getElementById("searchBar");
     const searchText = searchBar.value.toLowerCase();
 
+    // If the search bar is empty, return to the main page (collections list)
+    if (!searchText.trim()) {
+        currentState = 'main';
+        displayCollections(collections);
+        return;
+    }
+
+    // Update the current state to search
+    currentState = 'search';
+
     // Get filter values for Coins
     const tabFilter = document.getElementById("tabFilter")?.value || "all";
     const countryFilter = document.getElementById("countryFilter")?.value || "all";
@@ -1127,11 +1299,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const loginForm = document.getElementById("loginForm");
     const logoutButton = document.getElementById("logoutButton");
     const searchBar = document.getElementById("searchBar");
+    const menuToggle = document.getElementById("menuToggle");
+    const viewToggle = document.getElementById("viewToggle");
+    const backButton = document.getElementById("backButton");
+    const bullionBtn = document.getElementById("bullionBtn");
+    const numismaticsBtn = document.getElementById("numismaticsBtn");
+    const justCoinsBtn = document.getElementById("justCoinsBtn");
+
+    // Ensure the view starts in list mode
+    currentView = 'list';
+    const collectionGrid = document.getElementById("collectionGrid");
+    if (collectionGrid) {
+        collectionGrid.classList.add('list-view');
+    }
+    if (viewToggle) {
+        viewToggle.checked = true; // Ensure the toggle reflects list mode (checked = list)
+    }
 
     // Check if the user is already logged in
     if (isLoggedIn()) {
         loginScreen.style.display = "none";
-        mainContent.style.display = "block";
+        mainContent.style.display = "flex";
         initClient(); // Initialize the Google API client if already logged in
     } else {
         loginScreen.style.display = "flex";
@@ -1150,19 +1338,85 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Handle logout
     if (logoutButton) {
-        logoutButton.addEventListener("click", logout);
+        logoutButton.addEventListener("click", () => {
+            logout();
+        });
     }
 
-    // Add search bar event listener
+    // Handle search input
     if (searchBar) {
-        searchBar.addEventListener("input", searchCollections);
-    } else {
-        console.error("Search bar element not found!");
+        searchBar.addEventListener("input", () => {
+            searchCollections();
+        });
     }
 
-    // Set the initial view class
-    const collectionGrid = document.getElementById("collectionGrid");
-    if (collectionGrid) {
-        collectionGrid.classList.add(currentView + '-view');
+    // Handle menu toggle
+    if (menuToggle) {
+        menuToggle.addEventListener("click", () => {
+            toggleMenu();
+        });
+    }
+
+    // Handle view toggle
+    if (viewToggle) {
+        viewToggle.addEventListener("change", () => {
+            toggleView(viewToggle.checked ? 'list' : 'grid');
+        });
+    }
+
+    // Handle back button
+    if (backButton) {
+        backButton.addEventListener("click", () => {
+            returnToMainPage();
+        });
+    }
+
+    // Handle Coins submenu buttons
+    if (bullionBtn) {
+        bullionBtn.addEventListener("click", () => {
+            displayTabData("Coins", "Bullion");
+        });
+    }
+
+    if (numismaticsBtn) {
+        numismaticsBtn.addEventListener("click", () => {
+            displayTabData("Coins", "Numismatics");
+        });
+    }
+
+    if (justCoinsBtn) {
+        justCoinsBtn.addEventListener("click", () => {
+            displayTabData("Coins", "Just Coins");
+        });
+    }
+
+    // Handle filter changes for Coins
+    const tabFilter = document.getElementById("tabFilter");
+    const countryFilter = document.getElementById("countryFilter");
+    const yearFrom = document.getElementById("yearFrom");
+    const yearTo = document.getElementById("yearTo");
+
+    if (tabFilter) {
+        tabFilter.addEventListener("change", () => {
+            searchCollections();
+        });
+    }
+
+    if (countryFilter) {
+        countryFilter.addEventListener("change", () => {
+            searchCollections();
+        });
+    }
+
+    if (yearFrom) {
+        yearFrom.addEventListener("input", () => {
+            searchCollections();
+        });
+    }
+
+    if (yearTo) {
+        yearTo.addEventListener("input", () => {
+            searchCollections();
+        });
     }
 });

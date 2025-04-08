@@ -3,68 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collection Search</title>
+    <title>Collection Manager</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://apis.google.com/js/api.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="view-toggle-wrapper">
-            <div class="view-toggle">
-                <span class="view-label">Grid</span>
-                <label class="switch">
-                    <input type="checkbox" id="viewToggle" onchange="toggleView(this.checked ? 'list' : 'grid')">
-                    <span class="slider round"></span>
-                </label>
-                <span class="view-label">List</span>
-            </div>
-        </div>
-        <h1>Collection Search</h1>
-        <input type="text" id="searchBar" placeholder="Search collections...">
-        <!-- Filter section for Coins -->
-        <div id="coinsFilter" class="filter-section" style="display: none;">
-            <h3>Filter Coins</h3>
-            <div class="filter-group">
-                <label for="tabFilter">Tab:</label>
-                <select id="tabFilter" onchange="searchCollections()">
-                    <option value="all">All Tabs</option>
-                    <option value="Bullion">Bullion</option>
-                    <option value="Numismatics">Numismatics</option>
-                    <option value="Just Coins">Just Coins</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="countryFilter">Country:</label>
-                <select id="countryFilter" onchange="searchCollections()">
-                    <option value="all">All Countries</option>
-                    <!-- Countries will be populated dynamically -->
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Year Range:</label>
-                <input type="number" id="yearFrom" placeholder="From Year" min="0" oninput="searchCollections()">
-                <input type="number" id="yearTo" placeholder="To Year" min="0" oninput="searchCollections()">
-            </div>
-        </div>
-        <div id="collectionGrid" class="collection-grid"></div>
-    </div>
-
-    <!-- Modal for displaying sheet data -->
-    <div id="sheetModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h2 id="modalTitle">Sheet Data</h2>
-            <div id="modalTableContainer" class="modal-table-container">
-                <table id="modalTable">
-                    <thead id="modalTableHead"></thead>
-                    <tbody id="modalTableBody"></tbody>
-                </table>
-            </div>
-            <div id="itemDetailsContainer"></div>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <h2>Login to Collection Manager</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">Login</button>
+                <p id="loginError" class="error-message"></p>
+            </form>
         </div>
     </div>
 
-    <script src="https://apis.google.com/js/api.js"></script>
+    <!-- Main Content (Hidden Until Login) -->
+    <div id="mainContent" class="main-content" style="display: none;">
+        <!-- Vertical Menu -->
+        <div id="sideMenu" class="side-menu">
+            <button id="menuToggle" class="menu-toggle-btn">☰</button>
+            <div class="menu-content">
+                <h2 class="menu-title">Menu</h2>
+                <!-- View Toggle -->
+                <div class="view-toggle-wrapper">
+                    <div class="view-toggle">
+                        <label class="view-label">Grid</label>
+                        <label class="switch">
+                            <input type="checkbox" id="viewToggle" onchange="toggleView(this.checked ? 'list' : 'grid')">
+                            <span class="slider round"></span>
+                        </label>
+                        <label class="view-label">List</label>
+                    </div>
+                </div>
+                <!-- Filter Section for Coins -->
+                <div id="coinsFilter" class="filter-section" style="display: none;">
+                    <h3>Filter Coins</h3>
+                    <div class="filter-group">
+                        <label for="tabFilter">Tab:</label>
+                        <select id="tabFilter">
+                            <option value="all">All Tabs</option>
+                            <option value="Bullion">Bullion</option>
+                            <option value="Numismatics">Numismatics</option>
+                            <option value="Just Coins">Just Coins</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="countryFilter">Country:</label>
+                        <select id="countryFilter">
+                            <option value="all">All Countries</option>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="yearFrom">Year From:</label>
+                        <input type="number" id="yearFrom" placeholder="e.g., 1900">
+                    </div>
+                    <div class="filter-group">
+                        <label for="yearTo">Year To:</label>
+                        <input type="number" id="yearTo" placeholder="e.g., 2023">
+                    </div>
+                </div>
+                <!-- Logout Button -->
+                <button id="logoutButton" class="logout-btn">Logout</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <h1>Collection Manager</h1>
+            <input type="text" id="searchBar" placeholder="Search collections...">
+
+            <div id="collectionGrid" class="collection-grid"></div>
+
+            <!-- Modal for displaying sheet data -->
+            <div id="sheetModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-btn" onclick="closeModal()">×</span>
+                    <div class="modal-header">
+                        <h2 id="modalTitle"></h2>
+                    </div>
+                    <div class="modal-body">
+                        <div id="modalTableContainer" class="modal-table-container">
+                            <table id="modalTable">
+                                <thead id="modalTableHead"></thead>
+                                <tbody id="modalTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="itemDetailsContainer" class="item-details-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

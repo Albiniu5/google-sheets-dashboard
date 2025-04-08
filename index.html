@@ -28,68 +28,92 @@
     </div>
 
     <!-- Main Content (Hidden Until Login) -->
-    <div id="mainContent" class="container" style="display: none;">
-        <!-- Logout Button -->
-        <button id="logoutButton" class="logout-btn">Logout</button>
-
-        <!-- View Toggle -->
-        <div class="view-toggle-wrapper">
-            <div class="view-toggle">
-                <label class="view-label">Grid</label>
-                <label class="switch">
-                    <input type="checkbox" id="viewToggle" onchange="toggleView(this.checked ? 'list' : 'grid')">
-                    <span class="slider round"></span>
-                </label>
-                <label class="view-label">List</label>
-            </div>
-        </div>
-
-        <h1>Collection Manager</h1>
-        <input type="text" id="searchBar" placeholder="Search collections...">
-
-        <!-- Filter Section for Coins -->
-        <div id="coinsFilter" class="filter-section" style="display: none;">
-            <h3>Filter Coins</h3>
-            <div class="filter-group">
-                <label for="tabFilter">Tab:</label>
-                <select id="tabFilter">
-                    <option value="all">All Tabs</option>
-                    <option value="Bullion">Bullion</option>
-                    <option value="Numismatics">Numismatics</option>
-                    <option value="Just Coins">Just Coins</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="countryFilter">Country:</label>
-                <select id="countryFilter">
-                    <option value="all">All Countries</option>
-                    <!-- Populated dynamically -->
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="yearFrom">Year From:</label>
-                <input type="number" id="yearFrom" placeholder="e.g., 1900">
-            </div>
-            <div class="filter-group">
-                <label for="yearTo">Year To:</label>
-                <input type="number" id="yearTo" placeholder="e.g., 2023">
-            </div>
-        </div>
-
-        <div id="collectionGrid" class="collection-grid"></div>
-
-        <!-- Modal for displaying sheet data -->
-        <div id="sheetModal" class="modal">
-            <div class="modal-content">
-                <span class="close-btn" onclick="closeModal()">&times;</span>
-                <h2 id="modalTitle"></h2>
-                <div id="modalTableContainer" class="modal-table-container">
-                    <table id="modalTable">
-                        <thead id="modalTableHead"></thead>
-                        <tbody id="modalTableBody"></tbody>
-                    </table>
+    <div id="mainContent" class="main-content" style="display: none;">
+        <!-- Vertical Menu -->
+        <div id="sideMenu" class="side-menu">
+            <button id="menuToggle" class="menu-toggle-btn">☰</button>
+            <div class="menu-content">
+                <h2 class="menu-title">Menu</h2>
+                <!-- View Toggle -->
+                <div class="view-toggle-wrapper">
+                    <div class="view-toggle">
+                        <label class="view-label">Grid</label>
+                        <label class="switch">
+                            <input type="checkbox" id="viewToggle" onchange="toggleView(this.checked ? 'list' : 'grid')">
+                            <span class="slider round"></span>
+                        </label>
+                        <label class="view-label">List</label>
+                    </div>
                 </div>
-                <div id="itemDetailsContainer"></div>
+                <!-- Filter Section for Coins -->
+                <div id="coinsFilter" class="filter-section" style="display: none;">
+                    <h3>Filter Coins</h3>
+                    <div class="filter-group">
+                        <label for="tabFilter">Tab:</label>
+                        <select id="tabFilter">
+                            <option value="all">All Tabs</option>
+                            <option value="Bullion">Bullion</option>
+                            <option value="Numismatics">Numismatics</option>
+                            <option value="Just Coins">Just Coins</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="countryFilter">Country:</label>
+                        <select id="countryFilter">
+                            <option value="all">All Countries</option>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="yearFrom">Year From:</label>
+                        <input type="number" id="yearFrom" placeholder="e.g., 1900">
+                    </div>
+                    <div class="filter-group">
+                        <label for="yearTo">Year To:</label>
+                        <input type="number" id="yearTo" placeholder="e.g., 2023">
+                    </div>
+                </div>
+                <!-- Logout Button -->
+                <button id="logoutButton" class="logout-btn">Logout</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <h1>Collection Manager</h1>
+            <input type="text" id="searchBar" placeholder="Search collections...">
+
+            <!-- Back Button (Hidden by Default) -->
+            <button id="backButton" class="back-btn" style="display: none;">Back to Collections</button>
+
+            <!-- Submenu for Coins (Hidden by Default) -->
+            <div id="coinsSubmenu" class="submenu" style="display: none;">
+                <h2>Coins Categories</h2>
+                <div class="submenu-buttons">
+                    <button id="bullionBtn" class="submenu-btn">Bullion</button>
+                    <button id="numismaticsBtn" class="submenu-btn">Numismatics</button>
+                    <button id="justCoinsBtn" class="submenu-btn">Just Coins</button>
+                </div>
+            </div>
+
+            <div id="collectionGrid" class="collection-grid"></div>
+
+            <!-- Modal for displaying sheet data -->
+            <div id="sheetModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-btn" onclick="closeModal()">×</span>
+                    <div class="modal-header">
+                        <h2 id="modalTitle"></h2>
+                    </div>
+                    <div class="modal-body">
+                        <div id="modalTableContainer" class="modal-table-container">
+                            <table id="modalTable">
+                                <thead id="modalTableHead"></thead>
+                                <tbody id="modalTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="itemDetailsContainer" class="item-details-container"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
