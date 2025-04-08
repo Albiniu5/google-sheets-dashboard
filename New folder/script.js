@@ -1,6 +1,6 @@
-// List of collections with their Spreadsheet IDs and ranges
+// List of collections with their Spreadsheet IDs, ranges, and icons
 const collections = [
-    { name: "Books", link: "https://docs.google.com/spreadsheets/d/1onJ-KYqWCYJVVbZZ31PLroHHquHSD0V9Jwl0RY6MPUk/edit?gid=1458534516#gid=1458534516", spreadsheetId: "1onJ-KYqWCYJVVbZZ31PLroHHquHSD0V9Jwl0RY6MPUk", range: "Books!A:Z" },
+    { name: "Books", link: "https://docs.google.com/spreadsheets/d/1onJ-KYqWCYJVVbZZ31PLroHHquHSD0V9Jwl0RY6MPUk/edit?gid=1458534516#gid=1458534516", spreadsheetId: "1onJ-KYqWCYJVVbZZ31PLroHHquHSD0V9Jwl0RY6MPUk", range: "Books!A:Z", icon: "book-icon.png" },
     { 
         name: "Lego", 
         link: "https://docs.google.com/spreadsheets/d/1z4dUdJv5NEtIERnrU-6imW4OhuqRPC5Uyo1aituNkVA/edit?gid=0#gid=0", 
@@ -8,7 +8,8 @@ const collections = [
         ranges: [
             "SEALED!A:Z",
             "OPENED!A:Z"
-        ]
+        ],
+        icon: "lego-icon.png"
     },
     { 
         name: "Coins", 
@@ -18,7 +19,8 @@ const collections = [
             "Bullion!A:Z",
             "Numismatics!A:Z",
             "Just Coins!A:Z"
-        ]
+        ],
+        icon: "coin-icon.png"
     },
     { 
         name: "Games", 
@@ -36,7 +38,8 @@ const collections = [
             "PS4!A:Z",
             "XBOX!A:Z",
             "XBOX360!A:Z"
-        ]
+        ],
+        icon: "controller-icon.png"
     }
 ];
 
@@ -63,19 +66,19 @@ const displayFields = {
         "Bullion": {
             primaryField: "title",
             secondaryField: "year",
-            countryField: "country" // Added for filtering
+            countryField: "country"
         },
         "Numismatics": {
             primaryField: "title",
             secondaryField: "year",
             tertiaryField: "melt value",
-            countryField: "country" // Added for filtering
+            countryField: "country"
         },
         "Just Coins": {
             primaryField: "title",
             secondaryField: "year",
             tertiaryField: "composition",
-            countryField: "country" // Added for filtering
+            countryField: "country"
         }
     },
     "Games": {
@@ -644,7 +647,24 @@ function displayCollections(items) {
         items.forEach(collection => {
             const collectionItem = document.createElement("div");
             collectionItem.classList.add("collection-item");
-            collectionItem.textContent = collection.name;
+
+            // Create a container for the icon and text
+            const contentWrapper = document.createElement("div");
+            contentWrapper.classList.add("collection-content");
+
+            // Add the icon
+            const icon = document.createElement("img");
+            icon.src = collection.icon;
+            icon.classList.add("collection-icon");
+            icon.alt = `${collection.name} icon`;
+            contentWrapper.appendChild(icon);
+
+            // Add the collection name
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = collection.name;
+            contentWrapper.appendChild(nameSpan);
+
+            collectionItem.appendChild(contentWrapper);
 
             // Add click event to open the modal with sheet data
             collectionItem.addEventListener("click", () => {
@@ -693,9 +713,25 @@ function displayCollections(items) {
                 const resultCard = document.createElement("div");
                 resultCard.classList.add("result-card");
 
-                // Display the collection name as a header
+                // Display the collection name as a header with icon
                 const collectionHeader = document.createElement("h3");
-                collectionHeader.textContent = `From: ${collectionName} (${sheetName})`;
+                const headerWrapper = document.createElement("div");
+                headerWrapper.classList.add("collection-header");
+
+                // Add the icon
+                const collection = collections.find(col => col.name === collectionName);
+                const icon = document.createElement("img");
+                icon.src = collection.icon;
+                icon.classList.add("collection-icon");
+                icon.alt = `${collectionName} icon`;
+                headerWrapper.appendChild(icon);
+
+                // Add the text
+                const headerText = document.createElement("span");
+                headerText.textContent = `From: ${collectionName} (${sheetName})`;
+                headerWrapper.appendChild(headerText);
+
+                collectionHeader.appendChild(headerWrapper);
                 resultCard.appendChild(collectionHeader);
 
                 // Get the fields to display based on the collection and tab
@@ -896,28 +932,44 @@ function displayCollections(items) {
                 // Populate the row with data
                 columns.forEach(column => {
                     const td = document.createElement("td");
-                    switch (column.key) {
-                        case "collection":
-                            td.textContent = collectionName;
-                            break;
-                        case "sheetName":
-                            td.textContent = sheetName;
-                            break;
-                        case "primary":
-                            td.textContent = rowData[primaryField] || "N/A";
-                            break;
-                        case "secondary":
-                            td.textContent = rowData[secondaryField] || "N/A";
-                            break;
-                        case "tertiary":
-                            td.textContent = tertiaryField && rowData[tertiaryField] ? rowData[tertiaryField] : "N/A";
-                            break;
-                        case "quaternary":
-                            td.textContent = quaternaryField && rowData[quaternaryField] ? rowData[quaternaryField] : "N/A";
-                            break;
-                        case "quinary":
-                            td.textContent = quinaryField && rowData[quinaryField] ? rowData[quinaryField] : "N/A";
-                            break;
+                    if (column.key === "collection") {
+                        // Add the icon and collection name
+                        const contentWrapper = document.createElement("div");
+                        contentWrapper.classList.add("collection-content");
+
+                        const collection = collections.find(col => col.name === collectionName);
+                        const icon = document.createElement("img");
+                        icon.src = collection.icon;
+                        icon.classList.add("collection-icon");
+                        icon.alt = `${collectionName} icon`;
+                        contentWrapper.appendChild(icon);
+
+                        const nameSpan = document.createElement("span");
+                        nameSpan.textContent = collectionName;
+                        contentWrapper.appendChild(nameSpan);
+
+                        td.appendChild(contentWrapper);
+                    } else {
+                        switch (column.key) {
+                            case "sheetName":
+                                td.textContent = sheetName;
+                                break;
+                            case "primary":
+                                td.textContent = rowData[primaryField] || "N/A";
+                                break;
+                            case "secondary":
+                                td.textContent = rowData[secondaryField] || "N/A";
+                                break;
+                            case "tertiary":
+                                td.textContent = tertiaryField && rowData[tertiaryField] ? rowData[tertiaryField] : "N/A";
+                                break;
+                            case "quaternary":
+                                td.textContent = quaternaryField && rowData[quaternaryField] ? rowData[quaternaryField] : "N/A";
+                                break;
+                            case "quinary":
+                                td.textContent = quinaryField && rowData[quinaryField] ? rowData[quinaryField] : "N/A";
+                                break;
+                        }
                     }
                     tr.appendChild(td);
                 });

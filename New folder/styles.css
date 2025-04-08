@@ -222,6 +222,19 @@ h1 {
     box-shadow: 0 0 10px rgba(255, 98, 0, 0.3);
 }
 
+/* Style for the collection content (icon + text) */
+.collection-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.collection-icon {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+}
+
 /* Grid view for search results */
 .collection-grid.grid-view {
     display: grid;
@@ -249,6 +262,13 @@ h1 {
     margin: 0 0 10px;
     font-size: 1.2em;
     color: #333;
+}
+
+/* Style for the collection header in search results (grid view) */
+.collection-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .result-details p {

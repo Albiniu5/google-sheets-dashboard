@@ -1,6 +1,6 @@
 // List of collections with their Spreadsheet IDs, ranges, and icons
 const collections = [
-    { name: "Books", link: "https://docs.google.com/spreadsheets/d/1onJ-KYqWCYJVVbZZ31PLroHHquHSD0V9Jwl0RY6MPUk/edit?gid=1458534516#gid=1458534516", spreadsheetId: "1onJ-KYqWCYJVVbZZ31PLroHHquHSD0V9Jwl0RY6MPUk", range: "Books!A:Z", icon: "book-icon.png" },
+    { name: "Books", link: "https://docs.google.com/spreadsheets/d/1onJ-KYqWCYJVVbZZ31PLroHHquHSD0V9Jwl0RY6MPUk/edit?gid=1458534516#gid=1458534516", spreadsheetId: "1onJ-KYqWCYJVVbZZ31PLroHHquHSD0V9Jwl0RY6MPUk", range: "Books!A:Z", icon: "book-alt.png" },
     { 
         name: "Lego", 
         link: "https://docs.google.com/spreadsheets/d/1z4dUdJv5NEtIERnrU-6imW4OhuqRPC5Uyo1aituNkVA/edit?gid=0#gid=0", 
@@ -9,7 +9,7 @@ const collections = [
             "SEALED!A:Z",
             "OPENED!A:Z"
         ],
-        icon: "lego-icon.png"
+        icon: "lego.png"
     },
     { 
         name: "Coins", 
@@ -20,7 +20,7 @@ const collections = [
             "Numismatics!A:Z",
             "Just Coins!A:Z"
         ],
-        icon: "coin-icon.png"
+        icon: "coins.png"
     },
     { 
         name: "Games", 
@@ -39,7 +39,7 @@ const collections = [
             "XBOX!A:Z",
             "XBOX360!A:Z"
         ],
-        icon: "controller-icon.png"
+        icon: "console-controller.png"
     }
 ];
 
@@ -657,6 +657,7 @@ function displayCollections(items) {
             icon.src = collection.icon;
             icon.classList.add("collection-icon");
             icon.alt = `${collection.name} icon`;
+            icon.onerror = () => console.error(`Failed to load icon for ${collection.name}: ${collection.icon}`); // Log if the icon fails to load
             contentWrapper.appendChild(icon);
 
             // Add the collection name
@@ -724,6 +725,7 @@ function displayCollections(items) {
                 icon.src = collection.icon;
                 icon.classList.add("collection-icon");
                 icon.alt = `${collectionName} icon`;
+                icon.onerror = () => console.error(`Failed to load icon for ${collectionName}: ${collection.icon}`); // Log if the icon fails to load
                 headerWrapper.appendChild(icon);
 
                 // Add the text
@@ -942,6 +944,7 @@ function displayCollections(items) {
                         icon.src = collection.icon;
                         icon.classList.add("collection-icon");
                         icon.alt = `${collectionName} icon`;
+                        icon.onerror = () => console.error(`Failed to load icon for ${collectionName}: ${collection.icon}`); // Log if the icon fails to load
                         contentWrapper.appendChild(icon);
 
                         const nameSpan = document.createElement("span");
